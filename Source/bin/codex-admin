@@ -1,0 +1,56 @@
+#!/bin/bash
+
+usage(){
+	echo 'codex-admin [command] [arguments]'
+	echo 'Type codex'
+}
+
+helptext(){
+	echo "H"
+}
+
+mkrc(){
+	if [[ -f "$HOME/.codexrc" ]]; then
+		echo "There's already a .codexrc in your home directory. Edit this file instead."
+		exit
+	fi
+	echo '* Performing Engine Check..'
+	local TESTED="flusspferd node ringo v8cgi"
+	local ENGINES=
+	
+	for engine in $TESTED; do
+		printf "  Checking for engine '$engine'... "
+		if [[ -n `which $engine` ]]; then
+			printf 'Yes\n'
+			ENGINES="$ENGINES $engine"
+		else
+			printf 'No\n'
+		fi
+	done
+	
+	echo "* Generating $HOME/.codexrc"
+	echo "ENGINES=\"$ENGINES\"
+BOOTSTRAP=1
+SILENT=0
+" > $HOME/.codexrc
+
+	echo "* Done"
+}
+
+conf(){
+	if [[ ! -f "$HOME/.codexrc" ]]; then
+		printf "No .codexrc found in your home dir.\nTry codex-admin mkrc to generate one.\n"
+		exit
+	fi
+	if [[ -n "$EDITOR" ]]; then
+		$EDITOR "$HOME/.codexrc"
+	else
+		nano "$HOME/.codexrc"
+	fi
+}
+
+case "$1" in
+	mkrc) mkrc; exit;;
+	conf) conf; exit;;
+	*) usage; exit;;
+esac

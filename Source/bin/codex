@@ -1,0 +1,94 @@
+#!/bin/bash
+
+CODEXDIR="$(dirname $0)/.."
+CODEXLIB="$CODEXDIR/lib/"
+CODEXADP="$CODEXDIR/engines/"
+
+# OPTIONS
+TARGET_ENGINE=
+BOOTSTRAPPER=
+
+# USER CONFIGS
+ENGINES=
+SILENT=0
+BOOTSTRAP=1
+
+usage(){
+	echo 'usage: codex [options] script'
+	echo 'do codex --help for more information.'
+}
+
+helptext(){
+	echo "Codex: The CommonJS Runner (v0.1.0)
+
+usage: codex [options] script
+
+Options
+  -e, --engine        The name of the CommonJS engine to use
+  --noboot            Disables bootstrapping of the global Engine object
+  -s, --silent        Silences all output from Codex (not the engine)
+"
+}
+
+load_config(){
+	if [[ -f "$HOME/.codexrc" ]]; then
+		. "$HOME/.codexrc"
+	fi
+
+	for engine in $ENGINES
+	do
+		if [[ -n `which $engine` ]]; then
+			TARGET_ENGINE=$engine
+			break
+		fi
+	done
+}
+
+parse_args(){
+	. "$CODEXLIB/getoptx.sh"
+	export OPTERR=0
+	while getoptex "s; silent; noboot; e: engine:" "$@"
+	do
+		case "$OPTOPT" in
+			e|engine) TEFLAG=1; TARGET_ENGINE="$OPTARG";;
+			s|silent) SILENT=1;;
+			nobooth) BOOTSTRAP=0;;
+			?) usage; exit;;
+		esac
+	done
+	shift $[OPTIND-1]
+	ARGS=$@
+}
+
+check_engines(){
+	if [[ -z "$TARGET_ENGINE" ]]; then
+		echo "codex: No engine set. Set 'ENGINES' in your .codexrc or pass an engine name using the -e option" >&2
+		exit
+	fi
+	if [[ ! -d "$CODEXADP$TARGET_ENGINE" ]]; then
+		BOOTSTRAP=0
+		if [[ $SILENT -ne 1 ]]; then
+			echo "codex: No adapter available for the engine named '$TARGET_ENGINE'. Engine object will not be exported." >&2
+		fi
+	fi
+	if [[ -z `which $TARGET_ENGINE` ]]; then
+		echo "codex: No executable available for the engine '$TARGET_ENGINE' in your system." >&2
+		exit
+	fi
+}
+
+execute_script(){
+	if [[ $BOOTSTRAP -ne 0 ]]; then
+		$TARGET_ENGINE "$CODEXADP$TARGET_ENGINE/bootstrap.js" $ARGS
+	else
+		$TARGET_ENGINE $ARGS
+	fi
+}
+
+if [[ -z "$1" ]]; then usage; exit; fi
+if [[ $1 == '--help' || $1 == '-h' ]]; then helptext; exit; fi
+
+load_config
+parse_args $@
+check_engines
+execute_script
