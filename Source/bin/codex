@@ -1,12 +1,17 @@
 #!/bin/bash
 
-CODEXDIR="$(dirname $0)/.."
-CODEXLIB="$CODEXDIR/lib/"
-CODEXADP="$CODEXDIR/engines/"
+# [meso]
+# Meso in the Middle (v0.1.0)
+# http://github.com/keeto/meso
+#
+# Copyright 2010, Mark Obcena <keetology.com>
+# Released under an MIT-Style License
 
 # OPTIONS
 TARGET_ENGINE=
-BOOTSTRAPPER=
+MESO_DIR="$(dirname $0)/.."
+MESO_LIB="$MESO_DIR/lib/"
+MESO_ADP="$MESO_DIR/engines/"
 
 # USER CONFIGS
 ENGINES=
@@ -14,25 +19,25 @@ SILENT=0
 BOOTSTRAP=1
 
 usage(){
-	echo 'usage: codex [options] script'
-	echo 'do codex --help for more information.'
+	echo 'usage: meso [options] script'
+	echo 'do meso --help for more information.'
 }
 
 helptext(){
-	echo "Codex: The CommonJS Runner (v0.1.0)
+	echo "Meso: The CommonJS Runner (v0.1.0)
 
-usage: codex [options] script
+usage: meso [options] script
 
 Options
   -e, --engine        The name of the CommonJS engine to use
   --noboot            Disables bootstrapping of the global Engine object
-  -s, --silent        Silences all output from Codex (not the engine)
+  -s, --silent        Silences all output from meso (not the engine)
 "
 }
 
 load_config(){
-	if [[ -f "$HOME/.codexrc" ]]; then
-		. "$HOME/.codexrc"
+	if [[ -f "$HOME/.mesorc" ]]; then
+		. "$HOME/.mesorc"
 	fi
 
 	for engine in $ENGINES
@@ -45,7 +50,7 @@ load_config(){
 }
 
 parse_args(){
-	. "$CODEXLIB/getoptx.sh"
+	. "$MESO_LIB/getoptx.sh"
 	export OPTERR=0
 	while getoptex "s; silent; noboot; e: engine:" "$@"
 	do
@@ -62,24 +67,24 @@ parse_args(){
 
 check_engines(){
 	if [[ -z "$TARGET_ENGINE" ]]; then
-		echo "codex: No engine set. Set 'ENGINES' in your .codexrc or pass an engine name using the -e option" >&2
+		echo "meso: No engine set. Set 'ENGINES' in your .mesorc or pass an engine name using the -e option" >&2
 		exit
 	fi
-	if [[ ! -d "$CODEXADP$TARGET_ENGINE" ]]; then
+	if [[ ! -d "$MESO_ADP$TARGET_ENGINE" ]]; then
 		BOOTSTRAP=0
 		if [[ $SILENT -ne 1 ]]; then
-			echo "codex: No adapter available for the engine named '$TARGET_ENGINE'. Engine object will not be exported." >&2
+			echo "meso: No adapter available for the engine named '$TARGET_ENGINE'. Engine object will not be exported." >&2
 		fi
 	fi
 	if [[ -z `which $TARGET_ENGINE` ]]; then
-		echo "codex: No executable available for the engine '$TARGET_ENGINE' in your system." >&2
+		echo "meso: No executable available for the engine '$TARGET_ENGINE' in your system." >&2
 		exit
 	fi
 }
 
 execute_script(){
 	if [[ $BOOTSTRAP -ne 0 ]]; then
-		$TARGET_ENGINE "$CODEXADP$TARGET_ENGINE/bootstrap.js" $ARGS
+		$TARGET_ENGINE "$MESO_ADP$TARGET_ENGINE/bootstrap.js" $ARGS
 	else
 		$TARGET_ENGINE $ARGS
 	fi

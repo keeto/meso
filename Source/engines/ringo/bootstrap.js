@@ -10,7 +10,7 @@ try {
 	Engine = require('./' + adapter.find(version, require('./versions').versions) + '/engine.js').engine;
 } catch(e){
 	Engine = null;
-	print('codex: No adapter found for "ringo" version ' + version + '. Engine object will not be exported.');
+	print('meso: No adapter found for "ringo" version ' + version + '. Engine object will not be exported.');
 }
 
 if (Engine) global.Engine = Engine;

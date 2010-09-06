@@ -1,3 +1,12 @@
+/*
+Script: flusspferd/bootstrap.js
+	Bootstrapper for Flussfperd engine.
+
+License and Copyright:
+	Copyright 2010, Mark Obcena <keetology.com>
+	Released under an MIT-Style License
+*/
+
 var global = this;
 (function(){
 
@@ -14,7 +23,7 @@ try {
 } catch(e){
 	print(e);
 	Engine = null;
-	print('codex: No adapter found for "ringo" version ' + version + '. Engine object will not be exported.');
+	print('meso: No adapter found for "flusspferd" version ' + version + '. Engine object will not be exported.');
 }
 
 if (Engine) global.Engine = Engine;

@@ -8,7 +8,7 @@ try {
 	Engine = require('./' + adapter.find(v8cgi.version, require('./versions').versions) + '/engine.js').engine;
 } catch(e){
 	Engine = null;
-	print('codex: No adapter found for "v8cgi" version ' + v8cgi.version + '. Engine object will not be exported.');
+	print('meso: No adapter found for "v8cgi" version ' + v8cgi.version + '. Engine object will not be exported.');
 }
 
 if (Engine) global.Engine = Engine;

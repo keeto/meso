@@ -1,3 +1,11 @@
+/*
+Script: adapters.js
+	Utilities for managing adapter versions and paths.
+
+License and Copyright:
+	Copyright 2010, Mark Obcena <keetology.com>
+	Released under an MIT-Style License
+*/
 
 (function(){
 

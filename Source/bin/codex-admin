@@ -1,8 +1,16 @@
 #!/bin/bash
 
+
+# [meso-admin]
+# Meso in the Middle (v0.1.0)
+# http://github.com/keeto/meso
+#
+# Copyright 2010, Mark Obcena <keetology.com>
+# Released under an MIT-Style License
+
 usage(){
-	echo 'codex-admin [command] [arguments]'
-	echo 'Type codex'
+	echo 'meso-admin [command] [arguments]'
+	echo 'Type meso'
 }
 
 helptext(){
@@ -10,8 +18,8 @@ helptext(){
 }
 
 mkrc(){
-	if [[ -f "$HOME/.codexrc" ]]; then
-		echo "There's already a .codexrc in your home directory. Edit this file instead."
+	if [[ -f "$HOME/.mesorc" ]]; then
+		echo "There's already a .mesorc in your home directory. Edit this file instead."
 		exit
 	fi
 	echo '* Performing Engine Check..'
@@ -28,24 +36,24 @@ mkrc(){
 		fi
 	done
 	
-	echo "* Generating $HOME/.codexrc"
+	echo "* Generating $HOME/.mesorc"
 	echo "ENGINES=\"$ENGINES\"
 BOOTSTRAP=1
 SILENT=0
-" > $HOME/.codexrc
+" > $HOME/.mesorc
 
 	echo "* Done"
 }
 
 conf(){
-	if [[ ! -f "$HOME/.codexrc" ]]; then
-		printf "No .codexrc found in your home dir.\nTry codex-admin mkrc to generate one.\n"
+	if [[ ! -f "$HOME/.mesorc" ]]; then
+		printf "No .mesorc found in your home dir.\nTry 'meso-admin mkrc' to generate one.\n"
 		exit
 	fi
 	if [[ -n "$EDITOR" ]]; then
-		$EDITOR "$HOME/.codexrc"
+		$EDITOR "$HOME/.mesorc"
 	else
-		nano "$HOME/.codexrc"
+		nano "$HOME/.mesorc"
 	fi
 }
 
