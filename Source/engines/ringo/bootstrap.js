@@ -1,4 +1,16 @@
+/*
+Script: ringo/bootstrap.js
+	Bootstrapper for RingoJS engine.
+
+License and Copyright:
+	Copyright 2010, Mark Obcena <keetology.com>
+	Released under an MIT-Style License
+*/
+
 (function(){
+
+// MooTools import
+require('./../../vendor/mootools/mootools').into(global);
 
 var adapter = require('./../../lib/adapters'),
 	ringo = require('ringo/engine');

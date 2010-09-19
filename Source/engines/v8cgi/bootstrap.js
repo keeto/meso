@@ -1,4 +1,16 @@
+/*
+Script: v8cgi/bootstrap.js
+	Bootstrapper for v8cgi engine.
+
+License and Copyright:
+	Copyright 2010, Mark Obcena <keetology.com>
+	Released under an MIT-Style License
+*/
+
 (function(){
+
+// MooTools import
+require('./../../vendor/mootools/mootools').into(global);
 
 var adapter = require('./../../lib/adapters'),
 	print = function(str){ return system.stdout(str + '\n'); };

@@ -10,6 +10,9 @@ License and Copyright:
 var global = this;
 (function(){
 
+// MooTools import
+require('./../../vendor/mootools/mootools').into(global);
+
 var adapter = require('./../../lib/adapters'),
 	flusspferd = require('flusspferd'),
 	system = require('system');

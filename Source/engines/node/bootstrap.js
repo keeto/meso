@@ -1,7 +1,16 @@
+/*
+Script:	node/bootstrap.js
+	Bootstrapper for NodeJS engine.
 
-// console.log(JSON.stringify(process.argv));
-// require(process.argv[2]);
+License and Copyright:
+	Copyright 2010, Mark Obcena <keetology.com>
+	Released under an MIT-Style License
+*/
+
 (function(){
+
+// MooTools import
+require('./../../vendor/mootools/mootools').into(global);
 
 var adapter = require('./../../lib/adapters'),
 	print = function(str){ return process.stdout.write(str + '\n'); };
