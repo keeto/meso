@@ -41,4 +41,19 @@ exports.normalize = function(path, cwd){
 	return (/^\//).test(path) ? path : cwd + '/' + path;
 };
 
+exports.canonical = function(path, unshift){
+	var result = [];
+	path = path.split('/').reverse();
+	var i = path.length;
+	while (i--){
+		var current = path[i];
+		switch (current){
+			case '.': break;
+			case '..': result.pop(); break;
+			default: result.push(current);
+		}
+	}
+	return result.join('/');
+};
+
 })();

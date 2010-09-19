@@ -9,11 +9,14 @@ License and Copyright:
 
 (function(){
 
-// MooTools import
-require('./../../vendor/mootools/mootools').into(global);
-
 var adapter = require('./../../lib/adapters'),
 	print = function(str){ return system.stdout(str + '\n'); };
+
+// Vendor in Paths
+require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/'));
+
+// MooTools import
+require('mootools/mootools').into(global);
 
 var Engine;
 try {

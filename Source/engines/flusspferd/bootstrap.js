@@ -10,12 +10,15 @@ License and Copyright:
 var global = this;
 (function(){
 
-// MooTools import
-require('./../../vendor/mootools/mootools').into(global);
-
 var adapter = require('./../../lib/adapters'),
 	flusspferd = require('flusspferd'),
 	system = require('system');
+
+// Vendor in Paths
+require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/').replace('file://', ''));
+
+// MooTools import
+require('mootools/mootools').into(global);
 
 var version = flusspferd.version.split('.');
 version = ((version.length < 3) ? [version[0], version[1], 0] : version).join('.');

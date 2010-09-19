@@ -9,11 +9,14 @@ License and Copyright:
 
 (function(){
 
-// MooTools import
-require('./../../vendor/mootools/mootools').into(global);
-
 var adapter = require('./../../lib/adapters'),
 	ringo = require('ringo/engine');
+
+// Vendor in Paths
+require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/'));
+
+// MooTools import
+require('mootools/mootools').into(global);
 
 var version = (ringo.version.length < 3 ? [ringo.version[0], ringo.version[1], 0] : ringo.version).join('.');
 
