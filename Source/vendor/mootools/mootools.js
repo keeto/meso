@@ -25,7 +25,8 @@ provides: [Core, MooTools, Type, typeOf, instanceOf]
 
 this.MooTools = {
 	version: '1.3dev',
-	build: 'b53c2a4cfc33cb87c002e53a02236dd93b23433e'
+	build: 'b53c2a4cfc33cb87c002e53a02236dd93b23433e',
+	ftw: true
 };
 
 // typeOf, instanceOf
