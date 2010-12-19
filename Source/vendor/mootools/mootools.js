@@ -1319,7 +1319,7 @@ $exports.into = function into(globalObj){
 			if ($exports[i] !== into) globalObj[i] = $exports[i];
 		}
 	}
-	return $exports;
+	return globalObj;
 };
 
 })();

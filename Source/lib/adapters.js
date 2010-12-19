@@ -37,7 +37,7 @@ exports.find = function(version, adapters){
 };
 
 exports.normalize = function(path, cwd){
-	path = path.replace(/\.js$/, '');
+	path = typeof path == 'undefined' ? '' : path.replace(/\.js$/, '');
 	return (/^\//).test(path) ? path : cwd + '/' + path;
 };
 

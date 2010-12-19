@@ -95,5 +95,12 @@ if [[ $1 == '--help' || $1 == '-h' ]]; then helptext; exit; fi
 
 load_config
 parse_args $@
-check_engines
+
+if [[ -z "$ARGS" ]]; then
+	usage
+	exit
+else
+	check_engines
+	execute_script
+fi
 execute_script
