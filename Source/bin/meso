@@ -103,4 +103,3 @@ else
 	check_engines
 	execute_script
 fi
-execute_script
