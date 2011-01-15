@@ -23,6 +23,12 @@ if (Object.defineProperty){
 			if (desc.set) desc.setter = desc.set;
 			return defProp.call(Object, obj, prop, desc);
 		};
+		Object.defineProperties = function(obj, descs){
+			for (var prop in descs){
+				Object.defineProperty(obj, prop, descs[prop]);
+			}
+			return obj;
+		};
 	}
 }
 
