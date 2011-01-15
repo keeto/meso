@@ -19,76 +19,65 @@ provides: [Engine]
 
 var system = require('system'),
 	fsbase = require('fs-base');
-var Engine = {
-	Info: {},
-	Base: {},
-	StdWrite: {},
-	Request: {},
-	Response: {},
-	Vars: {}
-};
 
-exports.engine = Engine;
-
-Engine.Info = {
+var Engine = exports.engine = {
 	name: 'flusspferd',
 	adapter: '0.9'
 };
 
-Engine.Base = {
-	global: {},
+// Base objects
+Object.append(Engine, {
+	global: null,
 	system: system,
 	args: system.args,
 	env: system.env,
-	cwd: '',
 	setTimeout: null
-};
+});
+
+
+// Standard IO
+(function(){
+
+var stdio = null;
+
+Object.defineProperties(Engine, {
+
+	stdin: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdIn(system.stdin);
+		},
+		configurable: true,
+		enumerable: true
+	},
+
+	stdout: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdOut(system.stdout);
+		},
+		configurable: true,
+		enumerable: true
+	},
+
+	stderr: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdOut(system.stderr);
+		},
+		configurable: true,
+		enumerable: true
+	}
+
+});
+
+})();
 
 Engine.__defineGetter__('cwd', function(){
 	return fsbase.workingDirectory;
 });
-
-Engine.StdWrite = {
-
-	out: function(str){
-		system.stdout.write(str + '\n');
-		return system.stdout.flush();
-	},
-
-	error: function(str){
-		system.stderr.write(str + '\n');
-		return system.stderr.flush();
-	}
-
-};
-
-Engine.Request = {
-
-	parse: function(req){
-		var request = {};
-
-		request.scheme = req.scheme;
-		request.version = req.version;
-
-		request.method = req.method;
-		request.scriptName = req.scriptName;
-		request.pathInfo = req.pathInfo;
-		request.queryString = req.queryString;
-		request.host = req.host;
-		request.port = req.port;
-		request.env = Object.clone(Engine.Vars.Deck.env || {});
-
-		request.headers = Object.clone(req.headers);
-
-		request.input = req.input;
-		request.post = {};
-		request.get = {};
-		request.cookie = {};
-		request.files = {};
-		request.original = req;
-		return request;
-	}
-
-};
 
 })();

@@ -17,81 +17,105 @@ provides: [Engine]
 
 (function(){
 
-var Engine = {
-	Info: {},
-	Base: {},
-	StdWrite: {},
-	Request: {},
-	Response: {},
-	Vars: {}
-};
-
-exports.engine = Engine;
-
-Engine.Info = {
+var Engine = exports.engine = {
 	name: 'v8cgi',
 	adapter: '0.8.2'
 };
 
-Engine.Base = {
-	global: {},
+// Base objects
+Object.append(Engine, {
+	global: global,
 	system: system,
-	args: system.args,
+	args: system.argsv,
 	env: system.env,
-	cwd: '',
 	setTimeout: null
-};
-
-Engine.Base.__defineGetter__('cwd', function(){
-	return system.getcwd();
 });
 
-Engine.StdWrite = {
+// Standard IO
+(function(){
 
-	out: function(str){
-		return system.stdout(str + '\n');
+var stdio = null;
+
+Object.defineProperties(Engine, {
+
+	stdin: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdIn(system.stdin);
+		},
+		configurable: true,
+		enumerable: true
 	},
 
-	error: function(str){
-		return system.stderr(str);
+	stdout: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdOut(system.stdout);
+		},
+		configurable: true,
+		enumerable: true
+	},
+
+	stderr: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!stdio) stdio = require('./stdio');
+			return self.cached = new stdio.StdOut(system.stderr);
+		},
+		configurable: true,
+		enumerable: true
 	}
 
-};
+});
 
+})();
 
-Engine.Request = {
+// File System
 
-	parse: function(req){
-		var sysenv = system.env,
-			request = {},
-			matches = sysenv.SERVER_PROTOCOL.match(/([\D]*)\/(\d).(\d)/) || [];
+Object.defineProperty(Engine, 'cwd', {
+	get: function(){
+		return system.getcwd();
+	},
+	configurable: true,
+	enumerable: true
+});
 
-		request.scheme = matches[1];
-		request.version = (matches.length) ? [(matches[2]*1), (matches[3]*1)] : [0,0];
+Engine.File = new Class({
 
-		request.method = sysenv.REQUEST_METHOD;
-		request.scriptName = sysenv.SCRIPT_NAME;
-		request.pathInfo = sysenv.REQUEST_URI;
-		request.queryString = req.QUERY_STRING;
-		request.host = sysenv.HTTP_HOST;
-		request.port = sysenv.SERVER_PORT;
-		request.env = Object.clone(Engine.Vars.Deck.env || {});
+	Implements: [Events, Options],
 
-		request.headers = {};
-		for (var i in req._headers) {
-			request.headers[i.replace(/_/g, '-').toLowerCase()] = req._headers[i];
-		}
+	initialize: function(filename, options){
+		this.file = new File(filename);
+		this.file.open('rw');
+	},
 
-		request.input = null;
-		request.post = req.post;
-		request.get = req.get;
-		request.cookie = req.cookie;
-		request.files = req.files;
-		request.original = req;
-		return request;
+	read: function(){
+		var data = this.file.read();
+		this.onRead(data);
+		return this;
+	},
+
+	onRead: function(data){
+		this.fireEvent('read', data);
+	},
+
+	write: function(data){
+		this.file.write(data);
+		this.onWrite(data);
+		return this;
+	},
+
+	onWrite: function(data){
+		this.fireEvent('write', data);
+	},
+
+	flush: function(){
+		this.file.flush();
 	}
 
-};
+});
 
 })();
 
