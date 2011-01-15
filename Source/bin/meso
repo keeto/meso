@@ -6,18 +6,20 @@
 #
 # Copyright 2010, Mark Obcena <keetology.com>
 # Released under an MIT-Style License
+#
 
-# OPTIONS
-TARGET_ENGINE=
-MESO_DIR="$(dirname $0)/.."
-MESO_LIB="$MESO_DIR/lib/"
-MESO_ADP="$MESO_DIR/engines/"
+# Local option overrides
+MESO_DIR="$(dirname $0)/.."					# Directory of the runner
+MESO_LIB="$MESO_DIR/lib/"					# Directory of the library
+MESO_ADP="$MESO_DIR/engines/"				# Directory of the engine adapters
 
-# USER CONFIGS
-ENGINES=
-SILENT=0
-BOOTSTRAP=1
+# Source the Meso Bash Libray
+. "$MESO_LIB/meso.sh"
 
+# Supported Engines
+MESO_ENGINES="flusspferd node ringo v8cgi"	# List of supported engines
+
+# Usage notes
 usage(){
 	echo 'usage: meso [options] script'
 	echo 'do meso --help for more information.'
@@ -35,29 +37,17 @@ Options
 "
 }
 
-load_config(){
-	if [[ -f "$HOME/.mesorc" ]]; then
-		. "$HOME/.mesorc"
-	fi
 
-	for engine in $ENGINES
-	do
-		if [[ -n `which $engine` ]]; then
-			TARGET_ENGINE=$engine
-			break
-		fi
-	done
-}
-
-parse_args(){
+# Parse arguments to the runner
+parse_runner_args(){
 	. "$MESO_LIB/getoptx.sh"
 	export OPTERR=0
 	while getoptex "s; silent; noboot; e: engine:" "$@"
 	do
 		case "$OPTOPT" in
-			e|engine) TEFLAG=1; TARGET_ENGINE="$OPTARG";;
-			s|silent) SILENT=1;;
-			nobooth) BOOTSTRAP=0;;
+			e|engine) TEFLAG=1; MESO_TARGET="$OPTARG";;
+			s|silent) MESO_SILENT=1;;
+			nobooth) MESO_BOOTSTRAP=0;;
 			?) usage; exit;;
 		esac
 	done
@@ -65,41 +55,20 @@ parse_args(){
 	ARGS=$@
 }
 
-check_engines(){
-	if [[ -z "$TARGET_ENGINE" ]]; then
-		echo "meso: No engine set. Set 'ENGINES' in your .mesorc or pass an engine name using the -e option" >&2
-		exit
-	fi
-	if [[ ! -d "$MESO_ADP$TARGET_ENGINE" ]]; then
-		BOOTSTRAP=0
-		if [[ $SILENT -ne 1 ]]; then
-			echo "meso: No adapter available for the engine named '$TARGET_ENGINE'. Engine object will not be exported." >&2
-		fi
-	fi
-	if [[ -z `which $TARGET_ENGINE` ]]; then
-		echo "meso: No executable available for the engine '$TARGET_ENGINE' in your system." >&2
-		exit
-	fi
-}
 
-execute_script(){
-	if [[ $BOOTSTRAP -ne 0 ]]; then
-		$TARGET_ENGINE "$MESO_ADP$TARGET_ENGINE/bootstrap.js" $ARGS
-	else
-		$TARGET_ENGINE $ARGS
-	fi
-}
 
+# Start of Actual Processing
 if [[ -z "$1" ]]; then usage; exit; fi
 if [[ $1 == '--help' || $1 == '-h' ]]; then helptext; exit; fi
 
-load_config
-parse_args $@
+meso_load_config
+parse_runner_args $@
 
 if [[ -z "$ARGS" ]]; then
 	usage
 	exit
 else
-	check_engines
-	execute_script
+	meso_check_engines
+	meso_execute_script
 fi
+
