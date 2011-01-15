@@ -27,6 +27,7 @@ version = ((version.length < 3) ? [version[0], version[1], 0] : version).join('.
 var Engine;
 try {
 	Engine = require('./' + adapter.find(version, require('./versions').versions) + '/engine').engine;
+	if (!Engine.global) Engine.global = global;
 } catch(e){
 	print(e);
 	Engine = null;
