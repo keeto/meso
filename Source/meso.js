@@ -26,6 +26,7 @@ exports.setup = function(global, engine){
 		var Engine;
 		try {
 			Engine = require('./engines/' + name + '/' + adapter.find(version, require('./engines/'+ name + '/versions').versions) + '/engine.js').engine;
+			if (!Engine.global) Engine.global = global;
 		} catch(e){
 			Engine = null;
 			throw new Error('meso: No adapter found for "' + name + '" version ' + version + '.');
