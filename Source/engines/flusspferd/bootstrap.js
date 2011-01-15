@@ -19,6 +19,7 @@ require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/').replace
 
 // MooTools import
 require('mootools/mootools').into(global);
+require('mootools/extensions').into(global);
 
 var version = flusspferd.version.split('.');
 version = ((version.length < 3) ? [version[0], version[1], 0] : version).join('.');

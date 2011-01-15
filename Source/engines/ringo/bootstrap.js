@@ -17,6 +17,7 @@ require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/'));
 
 // MooTools import
 require('mootools/mootools').into(global);
+require('mootools/extensions').into(global);
 
 var version = (ringo.version.length < 3 ? [ringo.version[0], ringo.version[1], 0] : ringo.version).join('.');
 

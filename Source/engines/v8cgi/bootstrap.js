@@ -17,6 +17,7 @@ require.paths.unshift(adapter.canonical(module.id + '/../../../vendor/'));
 
 // MooTools import
 require('mootools/mootools').into(global);
+require('mootools/extensions').into(global);
 
 var Engine;
 try {

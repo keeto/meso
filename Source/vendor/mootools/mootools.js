@@ -16,7 +16,7 @@ inspiration:
   - Class implementation inspired by [Base.js](http://dean.edwards.name/weblog/2006/03/base/) Copyright (c) 2006 Dean Edwards, [GNU Lesser General Public License](http://opensource.org/licenses/lgpl-license.php)
   - Some functionality inspired by [Prototype.js](http://prototypejs.org) Copyright (c) 2005-2007 Sam Stephenson, [MIT License](http://opensource.org/licenses/mit-license.php)
 
-provides: [Core, MooTools, Type, typeOf, instanceOf]
+provides: [Core, MooTools, Type, typeOf, instanceOf, Native]
 
 ...
 */
@@ -24,8 +24,8 @@ provides: [Core, MooTools, Type, typeOf, instanceOf]
 (function(){
 
 this.MooTools = {
-	version: '1.3dev',
-	build: 'b53c2a4cfc33cb87c002e53a02236dd93b23433e',
+	version: '1.3',
+	build: 'a3eed692dd85050d80168ec2c708efe901bb7db3',
 	ftw: true
 };
 
@@ -386,7 +386,7 @@ Object.extend({
 
 var UID = Date.now();
 
-String.extend('generateUID', function(){
+String.extend('uniqueID', function(){
 	return (UID++).toString(36);
 });
 
@@ -519,7 +519,7 @@ Array.implement({
 	},
 
 	empty: function(){
-		this.splice(0);
+		this.length = 0;
 		return this;
 	},
 
@@ -563,6 +563,144 @@ Array.implement({
 });
 
 
+
+
+/*
+---
+
+name: String
+
+description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
+
+license: MIT-style license.
+
+requires: Type
+
+provides: String
+
+...
+*/
+
+String.implement({
+
+	test: function(regex, params){
+		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
+	},
+
+	contains: function(string, separator){
+		return (separator) ? (separator + this + separator).indexOf(separator + string + separator) > -1 : this.indexOf(string) > -1;
+	},
+
+	trim: function(){
+		return this.replace(/^\s+|\s+$/g, '');
+	},
+
+	clean: function(){
+		return this.replace(/\s+/g, ' ').trim();
+	},
+
+	camelCase: function(){
+		return this.replace(/-\D/g, function(match){
+			return match.charAt(1).toUpperCase();
+		});
+	},
+
+	hyphenate: function(){
+		return this.replace(/[A-Z]/g, function(match){
+			return ('-' + match.charAt(0).toLowerCase());
+		});
+	},
+
+	capitalize: function(){
+		return this.replace(/\b[a-z]/g, function(match){
+			return match.toUpperCase();
+		});
+	},
+
+	escapeRegExp: function(){
+		return this.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+	},
+
+	toInt: function(base){
+		return parseInt(this, base || 10);
+	},
+
+	toFloat: function(){
+		return parseFloat(this);
+	},
+
+	hexToRgb: function(array){
+		var hex = this.match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
+		return (hex) ? hex.slice(1).hexToRgb(array) : null;
+	},
+
+	rgbToHex: function(array){
+		var rgb = this.match(/\d{1,3}/g);
+		return (rgb) ? rgb.rgbToHex(array) : null;
+	},
+
+	substitute: function(object, regexp){
+		return this.replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
+			if (match.charAt(0) == '\\') return match.slice(1);
+			return (object[name] != null) ? object[name] : '';
+		});
+	}
+
+});
+
+
+/*
+---
+
+name: Number
+
+description: Contains Number Prototypes like limit, round, times, and ceil.
+
+license: MIT-style license.
+
+requires: Type
+
+provides: Number
+
+...
+*/
+
+Number.implement({
+
+	limit: function(min, max){
+		return Math.min(max, Math.max(min, this));
+	},
+
+	round: function(precision){
+		precision = Math.pow(10, precision || 0).toFixed(precision < 0 ? -precision : 0);
+		return Math.round(this * precision) / precision;
+	},
+
+	times: function(fn, bind){
+		for (var i = 0; i < this; i++) fn.call(bind, i, this);
+	},
+
+	toFloat: function(){
+		return parseFloat(this);
+	},
+
+	toInt: function(base){
+		return parseInt(this, base || 10);
+	}
+
+});
+
+Number.alias('each', 'times');
+
+(function(math){
+	var methods = {};
+	math.each(function(name){
+		if (!Number[name]) methods[name] = function(){
+			return Math[name].apply(null, [this].concat(Array.from(arguments)));
+		};
+	});
+	Number.implement(methods);
+})(['abs', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'exp', 'floor', 'log', 'max', 'min', 'pow', 'sin', 'sqrt', 'tan']);
 
 
 /*
@@ -634,60 +772,6 @@ Function.implement({
 });
 
 
-
-
-/*
----
-
-name: Number
-
-description: Contains Number Prototypes like limit, round, times, and ceil.
-
-license: MIT-style license.
-
-requires: Type
-
-provides: Number
-
-...
-*/
-
-Number.implement({
-
-	limit: function(min, max){
-		return Math.min(max, Math.max(min, this));
-	},
-
-	round: function(precision){
-		precision = Math.pow(10, precision || 0).toFixed(precision < 0 ? -precision : 0);
-		return Math.round(this * precision) / precision;
-	},
-
-	times: function(fn, bind){
-		for (var i = 0; i < this; i++) fn.call(bind, i, this);
-	},
-
-	toFloat: function(){
-		return parseFloat(this);
-	},
-
-	toInt: function(base){
-		return parseInt(this, base || 10);
-	}
-
-});
-
-Number.alias('each', 'times');
-
-(function(math){
-	var methods = {};
-	math.each(function(name){
-		if (!Number[name]) methods[name] = function(){
-			return Math[name].apply(null, [this].concat(Array.from(arguments)));
-		};
-	});
-	Number.implement(methods);
-})(['abs', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'exp', 'floor', 'log', 'max', 'min', 'pow', 'sin', 'sqrt', 'tan']);
 
 
 /*
@@ -811,148 +895,6 @@ Object.extend({
 /*
 ---
 
-name: String
-
-description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
-
-license: MIT-style license.
-
-requires: Type
-
-provides: String
-
-...
-*/
-
-String.implement({
-
-	test: function(regex, params){
-		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
-	},
-
-	contains: function(string, separator){
-		return (separator) ? (separator + this + separator).indexOf(separator + string + separator) > -1 : this.indexOf(string) > -1;
-	},
-
-	trim: function(){
-		return this.replace(/^\s+|\s+$/g, '');
-	},
-
-	clean: function(){
-		return this.replace(/\s+/g, ' ').trim();
-	},
-
-	camelCase: function(){
-		return this.replace(/-\D/g, function(match){
-			return match.charAt(1).toUpperCase();
-		});
-	},
-
-	hyphenate: function(){
-		return this.replace(/[A-Z]/g, function(match){
-			return ('-' + match.charAt(0).toLowerCase());
-		});
-	},
-
-	capitalize: function(){
-		return this.replace(/\b[a-z]/g, function(match){
-			return match.toUpperCase();
-		});
-	},
-
-	escapeRegExp: function(){
-		return this.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-	},
-
-	toInt: function(base){
-		return parseInt(this, base || 10);
-	},
-
-	toFloat: function(){
-		return parseFloat(this);
-	},
-
-	hexToRgb: function(array){
-		var hex = this.match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
-		return (hex) ? hex.slice(1).hexToRgb(array) : null;
-	},
-
-	rgbToHex: function(array){
-		var rgb = this.match(/\d{1,3}/g);
-		return (rgb) ? rgb.rgbToHex(array) : null;
-	},
-
-	substitute: function(object, regexp){
-		return this.replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
-			if (match.charAt(0) == '\\') return match.slice(1);
-			return (object[name] != null) ? object[name] : '';
-		});
-	}
-
-});
-
-
-/*
----
-name: Table
-
-description: LUA-Style table implementation.
-
-requires: [Core/Type, Core/Array]
-
-provides: Table
-...
-*/
-
-(function(){
-
-var Table = this.Table = function(){
-
-	this.length = 0;
-	var keys = [], values = [];
-	
-	this.set = function(key, value){
-		var index = keys.indexOf(key);
-		if (index == -1){
-			var length = keys.length;
-			keys[length] = key;
-			values[length] = value;
-			this.length++;
-		} else {
-			values[index] = value;
-		}
-		return this;
-	};
-
-	this.get = function(key){
-		var index = keys.indexOf(key);
-		return (index == -1) ? null : values[index];
-	};
-
-	this.erase = function(key){
-		var index = keys.indexOf(key);
-		if (index != -1){
-			this.length--;
-			keys.splice(index, 1);
-			return values.splice(index, 1)[0];
-		}
-		return null;
-	};
-
-	this.each = this.forEach = function(fn, bind){
-		for (var i = 0, l = this.length; i < l; i++) fn.call(bind, keys[i], values[i], this);
-	};
-	
-};
-
-if (this.Type) new Type('Table', Table);
-
-})();
-
-
-/*
----
-
 name: Class
 
 description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
@@ -969,8 +911,7 @@ provides: Class
 (function(){
 
 var Class = this.Class = new Type('Class', function(params){
-
-	if (instanceOf(params, Function)) params = {'initialize': params};
+	if (instanceOf(params, Function)) params = {initialize: params};
 
 	var newClass = function(){
 		reset(this);
@@ -979,22 +920,20 @@ var Class = this.Class = new Type('Class', function(params){
 		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
 		this.$caller = this.caller = null;
 		return value;
-	}.extend(this);
-
-	newClass.implement(params);
+	}.extend(this).implement(params);
 
 	newClass.$constructor = Class;
 	newClass.prototype.$constructor = newClass;
 	newClass.prototype.parent = parent;
 
 	return newClass;
-
 });
 
 var parent = function(){
 	if (!this.$caller) throw new Error('The method "parent" cannot be called.');
-	var name = this.$caller.$name, parent = this.$caller.$owner.parent;
-	var previous = (parent) ? parent.prototype[name] : null;
+	var name = this.$caller.$name,
+		parent = this.$caller.$owner.parent,
+		previous = (parent) ? parent.prototype[name] : null;
 	if (!previous) throw new Error('The method "' + name + '" has no parent.');
 	return previous.apply(this, arguments);
 };
@@ -1006,8 +945,7 @@ var reset = function(object){
 			case 'object':
 				var F = function(){};
 				F.prototype = value;
-				var instance = new F;
-				object[key] = reset(instance);
+				object[key] = reset(new F);
 			break;
 			case 'array': object[key] = value.clone(); break;
 		}
@@ -1029,7 +967,6 @@ var wrap = function(self, key, method){
 };
 
 var implement = function(key, value, retain){
-
 	if (Class.Mutators.hasOwnProperty(key)){
 		value = Class.Mutators[key].call(this, value);
 		if (value == null) return this;
@@ -1043,7 +980,6 @@ var implement = function(key, value, retain){
 	}
 
 	return this;
-
 };
 
 var getInstance = function(klass){
@@ -1249,42 +1185,6 @@ Object.append(JSON, {
 	}
 
 });
-
-
-/*
----
-
-name: Class.Mutators.Extras
-
-description: Additional Mutators for Class.
-
-license: MIT-style license.
-
-requires: [Class]
-
-provides: [Class.Mutators.Static, Class.Mutators.Protected]
-
-...
-*/
-
-(function(){
-
-Object.append(Class.Mutators, {
-	
-	Static: function(items){
-		this.extend(items);
-	},
-
-	Protected: function(items){
-		for (var item in items){
-			if (items[item] instanceof Function) items[item].protect();
-			this.implement(item, items[item]);
-		}
-	}
-
-});
-
-})();
 
 
 /*
