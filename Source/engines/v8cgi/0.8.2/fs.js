@@ -13,10 +13,6 @@ var _File = exports.File = new Class({
 
 	Extends: fscommon.File,
 
-	initialize: function(path){
-		this.resolve(path);
-	},
-
 	resolve: function(path, skipCanon){
 		var file,
 			cwd = system.getcwd();

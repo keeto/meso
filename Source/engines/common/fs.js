@@ -10,7 +10,7 @@ var File = exports.File = new Class({
 	$path: null,
 
 	initialize: function(path){
-		this.$path = path;
+		this.resolve(path);
 	},
 
 	clone: function(){
@@ -18,7 +18,7 @@ var File = exports.File = new Class({
 	},
 
 	resolve: function(path){
-		throw new Error('File.resolve is unimplemented.');
+		this.$path = toCanonical(path);
 	},
 
 	remove: function(){
