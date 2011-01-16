@@ -161,7 +161,7 @@ var File = exports.File = new Class({
 
 // Utilities
 var toCanonical = exports.toCanonical = function toCanonical(path, base){
-	path = path.split('/');
+	path = path.replace(/\/$/, '').split('/');
 	base = (path[0] === '') ? [] : toCanonical(base || '').split('/');
 	for (var i = 0, len = path.length; i < len; i++){
 		var part = path[i];
