@@ -17,6 +17,7 @@ exports.setup = function(global, engine){
 	}
 
 	require('./vendor/mootools/mootools').into(global);
+	require('./vendor/mootools/extensions').into(global);
 	
 	engine = engine.toString().split('#');
 	var name = engine[0], version = engine[1];
