@@ -97,13 +97,13 @@ var _File = exports.File = new Class({
 	},
 
 	// Stat Functions
-	
+
 	getStat: function(){
 		if (!this.exists()) return this.onStatError(new Error('File does not exists.'));
 		var file = this.$file;
 		try {
 			var stat = file.stat();
-			if (stat) this.onStat({size: stat.size, modified: stat.modified});
+			if (stat) return this.onStat({size: stat.size, modified: stat.modified});
 			throw new Error('Cannot read stats.');
 		} catch(e){
 			this.onStatError(e);
@@ -112,7 +112,7 @@ var _File = exports.File = new Class({
 	},
 
 	// Dir Functions
-	
+
 	list: function(){
 		if (!this.exists()) return this.onListError(new Error('File does not exists.'));
 		if (this.isFile()) return this.onListError(new Error('File is not a directory.'));
