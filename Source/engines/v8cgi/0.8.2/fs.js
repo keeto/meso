@@ -62,7 +62,7 @@ var _File = exports.File = new Class({
 					contents.each(function(item){
 						new File(fscommon.toCanonical(item, path)).remove(true);
 					});
-					file.remove();
+					handler();
 				},
 				listError: this.onRemoveError.bind(this)
 			}).list();
