@@ -73,49 +73,36 @@ Object.defineProperties(Engine, {
 })();
 
 // File System
+(function(){
 
-Object.defineProperty(Engine, 'cwd', {
-	get: function(){
-		return system.getcwd();
-	},
-	configurable: true,
-	enumerable: true
-});
+var fs = null;
 
-Engine.File = new Class({
+Object.defineProperties(Engine, {
 
-	Implements: [Events, Options],
-
-	initialize: function(filename, options){
-		this.file = new File(filename);
-		this.file.open('rw');
+	File: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.File;
+		},
+		configurable: true,
+		enumerable: true
 	},
 
-	read: function(){
-		var data = this.file.read();
-		this.onRead(data);
-		return this;
-	},
-
-	onRead: function(data){
-		this.fireEvent('read', data);
-	},
-
-	write: function(data){
-		this.file.write(data);
-		this.onWrite(data);
-		return this;
-	},
-
-	onWrite: function(data){
-		this.fireEvent('write', data);
-	},
-
-	flush: function(){
-		this.file.flush();
+	getCwd: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.getCwd;
+		},
+		configurable: true,
+		enumerable: true
 	}
 
 });
+
+})();
+
 
 })();
 
