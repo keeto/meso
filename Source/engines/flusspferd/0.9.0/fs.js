@@ -161,7 +161,7 @@ var _File = exports.File = new Class({
 		var cwd = fsbase.workingDirectory();
 		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
 		this.$path = path;
-		if (file.exists() && !file.isDirectory()) throw new Error('Path "'+path+'" is not a file.');
+		if (file.exists() && !file.isFile()) throw new Error('Path "'+path+'" is not a file.');
 		return this;
 	},
 
