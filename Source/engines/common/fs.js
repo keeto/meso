@@ -4,12 +4,13 @@
 
 var File = exports.File = new Class({
 
-	Implements: [Events, Chain],
+	Implements: [Events, Options, Chain],
 
 	$file: null,
 	$path: null,
 
-	initialize: function(path){
+	initialize: function(path, options){
+		this.setOptions(options);
 		this.resolve(path);
 	},
 
