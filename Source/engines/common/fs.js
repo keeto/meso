@@ -50,7 +50,7 @@ var File = exports.File = new Class({
 
 
 	// Stat
-	
+
 	'evented stat:getStat': function(){
 		throw new Error('File.getStat is unimplemented.');
 	},
@@ -60,7 +60,7 @@ var File = exports.File = new Class({
 	getParent: function(e){
 		return new this.$constructor(toCanonical('..', this.toCanonical()));
 	},
-	
+
 	'evented list': function(){
 		throw new Error('File.listContents is unimplemented.');
 	},
@@ -86,10 +86,6 @@ var File = exports.File = new Class({
 
 	'evented move': function(to){
 		throw new Error('File.move is unimplemented.');
-	},
-
-	'evented copy': function(to){
-		throw new Error('File.copy is unimplemented.');
 	}
 
 });
