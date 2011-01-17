@@ -17,10 +17,10 @@ provides: [Engine]
 
 (function(){
 
-include('system');
-include('fs');
-include('io');
-include('binary');
+var system = require('system');
+// include('fs');
+// include('io');
+// include('binary');
 
 var Engine = exports.engine = {
 	name: 'ringo',
@@ -78,9 +78,38 @@ Object.defineProperties(Engine, {
 
 })();
 
-Engine.__defineGetter__('cwd', function(){
-	return file.cwd();
+// File System
+(function(){
+
+var fs = null;
+
+Object.defineProperties(Engine, {
+
+	File: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.File;
+		},
+		configurable: true,
+		enumerable: true
+	},
+
+	getCwd: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.getCwd;
+		},
+		configurable: true,
+		enumerable: true
+	}
+
 });
+
+})();
+
+
 
 
 })();
