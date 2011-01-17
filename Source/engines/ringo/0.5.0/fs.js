@@ -181,6 +181,19 @@ var _File = exports.File = new Class({
 			this.onWriteError(e, data);
 		}
 		return this;
+	},
+
+	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
+		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
+		to = fscommon.toCanonical(to, fs.workingDirectory());
+		try {
+			fs.move(this.$path, to);	
+			this.onMove(to);
+		} catch(e){
+			this.onMoveError(e);
+		}
+		return this;
 	}
 
 });
