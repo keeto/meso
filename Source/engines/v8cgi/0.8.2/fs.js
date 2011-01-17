@@ -190,7 +190,6 @@ var _File = exports.File = new Class({
 		try {
 			file.open(append ? 'a' : 'w');
 			file.write(data);
-			file.flush();
 			file.close();
 			this.onWrite(data);
 		} catch(e){
