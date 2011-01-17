@@ -76,8 +76,35 @@ Object.defineProperties(Engine, {
 
 })();
 
-Engine.__defineGetter__('cwd', function(){
-	return fsbase.workingDirectory;
+// File System
+(function(){
+
+var fs = null;
+
+Object.defineProperties(Engine, {
+
+	File: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.File;
+		},
+		configurable: true,
+		enumerable: true
+	},
+
+	getCwd: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.getCwd;
+		},
+		configurable: true,
+		enumerable: true
+	}
+
 });
+
+})();
 
 })();
