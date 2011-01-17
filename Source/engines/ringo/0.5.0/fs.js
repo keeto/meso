@@ -96,7 +96,7 @@ var _File = exports.File = new Class({
 			var path = this.$path,
 				size = fs.size(path),
 				modified = fs.lastModified(path);
-			if (size !== undefined && modified !== undefined) this.onStat({size: size, modified: modified.getTime()});
+			if (size !== undefined && modified !== undefined) return this.onStat({size: size, modified: modified.getTime()});
 			throw new Error('Cannot read stats.');
 		} catch(e){
 			this.onStatError(e);
