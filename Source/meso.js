@@ -18,7 +18,7 @@ exports.setup = function(global, engine){
 
 	require('./vendor/mootools/mootools').into(global);
 	require('./vendor/mootools/extensions').into(global);
-	
+
 	engine = engine.toString().split('#');
 	var name = engine[0], version = engine[1];
 	if (name === '' || version === ''){
@@ -26,7 +26,7 @@ exports.setup = function(global, engine){
 	} else {
 		var Engine;
 		try {
-			Engine = require('./engines/' + name + '/' + adapter.find(version, require('./engines/'+ name + '/versions').versions) + '/engine.js').engine;
+			Engine = require('./engines/' + name + '/' + adapter.find(version, require('./engines/'+ name + '/versions').versions) + '/engine').engine;
 			if (!Engine.global) Engine.global = global;
 		} catch(e){
 			Engine = null;
