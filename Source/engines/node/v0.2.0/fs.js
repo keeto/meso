@@ -8,37 +8,22 @@ var getCwd = exports.getCwd = function(){
 	return process.cwd();
 };
 
-var _File = exports.File = new Class({
+var _Directory = exports.Directory = new Class({
 
-	Extends: fscommon.File,
+	Extends: fscommon.Directory,
 
-	resolve: function(path, skipCanon){
+	resolve: function(path){
 		var cwd = process.cwd();
-		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
+		path = fscommon.toCanonical(path || cwd, cwd);
 		this.$path = path;
+		if (file.exists() && !file.isDirectory()) throw new Error('Path "'+path+'" is not a directory.');
 		return this;
 	},
 
 	remove: function(recursive){
 		if (!this.exists()) return this.onRemoveError(new Error('File does not exists.'));
-		if (this.isDirectory()) return this.removeDir(recursive);
-		if (this.isFile()) return this.removeFile();
-		return this;
-	},
-
-	removeFile: function(){
-		var path = this.$path;
-		fs.unlink(path, function(e){
-			if (e) this.onRemoveError(e);
-			else this.onRemove();
-		}.bind(this));
-		return this;
-	},
-
-	removeDir: function(recursive){
 		var self = this,
-			path = this.$path,
-			File = this.$constructor;
+			path = this.$path;
 
 		var handler = function(){
 			fs.rmdir(path, function(e){
@@ -55,11 +40,18 @@ var _File = exports.File = new Class({
 					if (!counter) handler();
 					else contents.each(function(item){
 						counter--;
-						new File(fscommon.toCanonical(item, path), {
-							onRemove: function(){
-								if (!counter) handler();
-							}
-						}).remove(true);
+						var file;
+						try {
+							file = new _Directory(fscommon.toCanonical(item, path));
+						} catch(e){
+							file = new _File(fscommon.toCanonical(item, path));
+						} finally {
+							file.addEvents({
+								onRemove: function(){
+									if (!counter) handler();
+								}
+							}).remove(true);
+						}	
 					});
 				},
 				listError: this.onRemoveError.bind(this)
@@ -67,6 +59,23 @@ var _File = exports.File = new Class({
 		} else {
 			handler();
 		}
+		return this;
+	},
+
+	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
+		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
+		var path = this.$path;
+		to = fscommon.toCanonical(to, process.cwd());
+		// Cheating again..
+		var exec = require('child_process').exec,
+			command = ['mv', '"' + path + '"', '"' + to + '"'].join(' ');
+
+		var child = exec(command, function(e, stdout, stderr){
+			if (e) return this.onMoveError(e);
+			if (stderr) return this.onMoveError(stderr);
+			this.onMove(to);
+		}.bind(this));
 		return this;
 	},
 
@@ -107,25 +116,24 @@ var _File = exports.File = new Class({
 		return this;
 	},
 
-	createDir: function(recurse){
+	create: function(recurse){
 		var self = this;
 		if (this.exists()){
-			if (this.isFile()) return this.onCreateDirError(new Error('File is not a directory'));
-			return this.onCreateDir();
+			return this.onCreate();
 		} else {
 			var path = this.$path,
 				parent = this.getParent();
 			var handler = function handler(){
 				fs.mkdir(path, 493, function(e){
-					if (e) self.onCreateDirError(e);
-					else self.onCreateDir(path);
+					if (e) self.onCreateError(e);
+					else self.onCreate(path);
 				});
 			};
 			if (recurse){
 				parent.addEvents({
-					createDir: handler,
-					createDirError: this.onCreateDirError.bind(this)
-				}).createDir(recurse);
+					create: handler,
+					createError: this.onCreateDirError.bind(this)
+				}).create(recurse);
 			} else {
 				handler();
 			}
@@ -134,11 +142,78 @@ var _File = exports.File = new Class({
 	},
 
 	makeDir: function(dir, recurse){
+		if (dir == null) return this.onMakeDirError('Argument dirName is required.');
 		var file = new this.$constructor(fscommon.toCanonical(dir, this.$path));
 		file.addEvents({
-			createDir: this.onMakeDir.bind(this),
-			createDirError: this.onMakeDirError.bind(this)
-		}).createDir(recurse);
+			create: this.onMakeDir.bind(this),
+			createError: this.onMakeDirError.bind(this)
+		}).create(recurse);
+		return this;
+	}
+
+});
+
+var _File = exports.File = new Class({
+
+	Extends: fscommon.File,
+
+	resolve: function(path, skipCanon){
+		var cwd = process.cwd();
+		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
+		this.$path = path;
+		if (file.exists() && !file.isFile()) throw new Error('Path "'+path+'" is not a file.');
+		return this;
+	},
+
+	remove: function(recursive){
+		if (!this.exists()) return this.onRemoveError(new Error('File does not exists.'));
+		var path = this.$path;
+		fs.unlink(path, function(e){
+			if (e) this.onRemoveError(e);
+			else this.onRemove();
+		}.bind(this));
+		return this;
+	},
+
+	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
+		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
+		var path = this.$path;
+		to = fscommon.toCanonical(to, process.cwd());
+		// Cheating again..
+		var exec = require('child_process').exec,
+			command = ['mv', '"' + path + '"', '"' + to + '"'].join(' ');
+
+		var child = exec(command, function(e, stdout, stderr){
+			if (e) return this.onMoveError(e);
+			if (stderr) return this.onMoveError(stderr);
+			this.onMove(to);
+		}.bind(this));
+		return this;
+	},
+
+	// Info Functions
+
+	exists: function(){
+		return pathutil.existsSync(this.$path);
+	},
+
+	isDirectory: function(){
+		return (this.exists()) ? fs.statSync(this.$path).isDirectory() : false;
+	},
+
+	isFile: function(){
+		return (this.exists()) ? fs.statSync(this.$path).isFile() : false;
+	},
+
+	// Stat Functions
+
+	getStat: function(){
+		if (!this.exists()) return this.onStatError(new Error('File does not exists.'));
+		fs.stat(this.$path, function(e, stat){
+			if (e) this.onStatError(e);
+			else this.onStat({size: stat.size, modified: stat.mtime.getTime()});
+		}.bind(this));
 		return this;
 	},
 
@@ -173,23 +248,6 @@ var _File = exports.File = new Class({
 				else self.onWrite(data);
 			});
 		}
-		return this;
-	},
-
-	move: function(to){
-		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
-		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
-		var path = this.$path;
-		to = fscommon.toCanonical(to, process.cwd());
-		// Cheating again..
-		var exec = require('child_process').exec,
-			command = ['mv', '"' + path + '"', '"' + to + '"'].join(' ');
-
-		var child = exec(command, function(e, stdout, stderr){
-			if (e) return this.onMoveError(e);
-			if (stderr) return this.onMoveError(stderr);
-			this.onMove(to);
-		}.bind(this));
 		return this;
 	}
 
