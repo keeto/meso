@@ -196,11 +196,10 @@ var _File = exports.File = new Class({
 			this.onWriteError(e, data);
 		}
 		return this;
-	}
+	},
 
-	// TODO
-	/*
 	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
 		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
 		if (this.isDirectory()) return this.moveDir(to);
 		if (this.isFile()) return this.moveFile(to);
@@ -220,17 +219,21 @@ var _File = exports.File = new Class({
 	},
 
 	moveDir: function(to){
-		var file = this.$file;
+		var path = this.$path;
 		to = fscommon.toCanonical(to, system.getcwd());
+		// Cheating because v8cgi doesn't have Directory move
 		try {
-			var target = new this.$constructor(target);
-			if (target.exists() && !target.isDirectory()) throw new Error('Target is not a directory');
-			var dir = this.
+			var proc = new (require('process').Process),
+				command = ['mv', '"' + path + '"', '"' + to + '"'].join(' '),
+				results = proc.exec2(command);
+
+			if (results.err !== '') throw new Error(results.err);
+			this.onMove(to);
 		} catch(e){
 			this.onMoveError(e);
 		}
+		return this;
 	}
-	*/
 
 });
 
