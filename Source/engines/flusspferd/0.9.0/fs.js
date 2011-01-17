@@ -11,9 +11,9 @@ var _Directory = exports.Directory = new Class({
 
 	Extends: fscommon.Directory,
 
-	resolve: function(path, skipCanon){
+	resolve: function(path){
 		var cwd = fsbase.workingDirectory();
-		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
+		path = fscommon.toCanonical(path || cwd, cwd);
 		this.$path = path;
 		if (file.exists() && !file.isDirectory()) throw new Error('Path "'+path+'" is not a directory.');
 		return this;
