@@ -9,6 +9,8 @@ var getCwd = exports.getCwd = function(){
 
 var _Directory = exports.Directory = new Class({
 
+	Extends: fscommon.Directory,
+
 	resolve: function(path, skipCanon){
 		var cwd = fsbase.workingDirectory();
 		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
