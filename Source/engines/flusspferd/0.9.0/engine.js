@@ -93,6 +93,16 @@ Object.defineProperties(Engine, {
 		enumerable: true
 	},
 
+	Directory: {
+		get: function self(){
+			if (self.cached) return self.cached;
+			if (!fs) fs = require('./fs');
+			return self.cached = fs.Directory;
+		},
+		configurable: true,
+		enumerable: true
+	},
+
 	getCwd: {
 		get: function self(){
 			if (self.cached) return self.cached;

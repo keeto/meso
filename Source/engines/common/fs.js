@@ -1,8 +1,9 @@
 (function(){
 
-// File Class
 
-var File = exports.File = new Class({
+// Base Class
+
+var Base = exports.Base = new Class({
 
 	Implements: [Events, Options, Chain],
 
@@ -22,8 +23,8 @@ var File = exports.File = new Class({
 		this.$path = toCanonical(path);
 	},
 
-	'evented remove': function(){
-		throw new Error('File.remove is unimplemented.');
+	getParent: function(e){
+		return new this.$constructor(toCanonical('..', this.toCanonical()));
 	},
 
 	// Information Functions
@@ -48,33 +49,29 @@ var File = exports.File = new Class({
 		return this.toCanonical();
 	},
 
+	// Movement
+
+	'evented remove': function(){
+		throw new Error('File.remove is unimplemented.');
+	},
+
+	'evented move': function(to){
+		throw new Error('File.move is unimplemented.');
+	},
 
 	// Stat
 
 	'evented stat:getStat': function(){
 		throw new Error('File.getStat is unimplemented.');
-	},
+	}
 
-	// Directory Functions
+});
 
-	getParent: function(e){
-		return new this.$constructor(toCanonical('..', this.toCanonical()));
-	},
+// File Class
 
-	'evented list': function(){
-		throw new Error('File.listContents is unimplemented.');
-	},
+var File = exports.File = new Class({
 
-	'evented createDir': function(recurse){
-		throw new Error('File.createDir is unimplemented');
-	},
-
-	'evented makeDir': function(name, recurse){
-		throw new Error('File.makeDir is unimplemented.');
-	},
-
-
-	// IO Functions
+	Extends: Base,
 
 	'evented read': function(){
 		throw new Error('File.read is unimplemented.');
@@ -82,10 +79,24 @@ var File = exports.File = new Class({
 
 	'evented write': function(str, append){
 		throw new Error('File.write is unimplemented.');
+	}
+
+});
+
+var Directory = exports.Directory = new Class({
+
+	Extends: Base,
+
+	'evented list': function(){
+		throw new Error('File.listContents is unimplemented.');
 	},
 
-	'evented move': function(to){
-		throw new Error('File.move is unimplemented.');
+	'evented create': function(recurse){
+		throw new Error('File.create is unimplemented');
+	},
+
+	'evented makeDir': function(name, recurse){
+		throw new Error('File.makeDir is unimplemented.');
 	}
 
 });
