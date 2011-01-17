@@ -22,16 +22,8 @@ var File = exports.File = new Class({
 		this.$path = toCanonical(path);
 	},
 
-	remove: function(){
+	'evented remove': function(){
 		throw new Error('File.remove is unimplemented.');
-	},
-
-	onRemove: function(){
-		this.fireEvent('remove', arguments);
-	},
-
-	onRemoveError: function(){
-		this.fireEvent('removeError', arguments);
 	},
 
 	// Information Functions
@@ -59,104 +51,47 @@ var File = exports.File = new Class({
 
 	// Stat
 	
-	getStat: function(){
+	'evented stat:getStat': function(){
 		throw new Error('File.getStat is unimplemented.');
 	},
 
-	onStat: function(data){
-		this.fireEvent('stat', arguments);
-	},
-
-	onStatError: function(e){
-		this.fireEvent('statError', arguments);
-	},
-
 	// Directory Functions
-	
-	list: function(){
-		throw new Error('File.listContents is unimplemented.');
-	},
-
-	onList: function(contents){
-		this.fireEvent('list', arguments);
-		return this;
-	},
-
-	onListError: function(e){
-		this.fireEvent('listError', arguments);
-		return this;
-	},
-
-	createDir: function(recurse){
-		throw new Error('File.createDir is unimplemented');
-	},
-
-	onCreateDir: function(data){
-		this.fireEvent('createDir', arguments);
-	},
-
-	onCreateDirError: function(data){
-		this.fireEvent('createDirError', arguments);
-	},
-
-	makeDir: function(name, recurse){
-		throw new Error('File.makeDir is unimplemented.');
-	},
-
-	onMakeDir: function(data){
-		this.fireEvent('makeDir', arguments);
-	},
-
-	onMakeDirError: function(e){
-		this.fireEvent('makeDirError', arguments);
-	},
 
 	getParent: function(e){
 		return new this.$constructor(toCanonical('..', this.toCanonical()));
+	},
+	
+	'evented list': function(){
+		throw new Error('File.listContents is unimplemented.');
+	},
+
+	'evented createDir': function(recurse){
+		throw new Error('File.createDir is unimplemented');
+	},
+
+	'evented makeDir': function(name, recurse){
+		throw new Error('File.makeDir is unimplemented.');
 	},
 
 
 	// IO Functions
 
-	read: function(){
+	'evented read': function(){
 		throw new Error('File.read is unimplemented.');
 	},
 
-	onRead: function(data){
-		this.fireEvent('read', arguments);
-		return this;
-	},
-
-	onReadError: function(error){
-		this.fireEvent('readError', arguments);
-		return this;
-	},
-
-	write: function(str, append){
+	'evented write': function(str, append){
 		throw new Error('File.write is unimplemented.');
 	},
 
-	onWrite: function(data){
-		this.fireEvent('write', arguments);
-		return this;
-	},
-
-	onWriteError: function(error, data){
-		this.fireEvent('writeError', arguments);
-		return this;
-	},
-
-	move: function(to){
+	'evented move': function(to){
 		throw new Error('File.move is unimplemented.');
 	},
 
-	onMove: function(to){
-		this.fireEvent('move', arguments);
-	},
-
-	onMoveError: function(e, to){
-		this.fireEvent('moveError', arguments);
+	'evented copy': function(to){
+		throw new Error('File.copy is unimplemented.');
 	}
+
 });
 
 
