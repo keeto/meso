@@ -32,6 +32,6 @@ try {
 if (Engine) global.Engine = Engine;
 
 system.args.shift();
-require(adapter.normalize(system.args[0], require('fs-base').workingDirectory()));
+require(adapter.normalize(system.args[0], require('fs').workingDirectory()));
 
 })();

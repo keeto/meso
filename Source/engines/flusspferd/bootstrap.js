@@ -38,6 +38,6 @@ if (Engine) global.Engine = Engine;
 
 system.args.shift();
 require.paths.push(require('fs-base').workingDirectory());
-require(adapter.normalize(system.args[0], ""));
+require(adapter.normalize(system.args[0], "", true));
 
 })();

@@ -36,24 +36,30 @@ exports.find = function(version, adapters){
 	return result;
 };
 
-exports.normalize = function(path, cwd){
+var normalize = exports.normalize = function(path, cwd, skipCanon){
 	path = typeof path == 'undefined' ? '' : path.replace(/\.js$/, '');
-	return (/^\//).test(path) ? path : cwd + '/' + path;
+	if (skipCanon) return (/^\//).test(path) ? path : cwd + '/' + path;
+   else return canonical(path, cwd);
 };
 
-exports.canonical = function(path, unshift){
-	var result = [];
-	path = path.split('/').reverse();
-	var i = path.length;
-	while (i--){
-		var current = path[i];
-		switch (current){
-			case '.': break;
-			case '..': result.pop(); break;
-			default: result.push(current);
+var canonical = exports.canonical = function(path, base){
+	path = path.replace(/\/$/, '').split('/');
+	base = (path[0] === '') ? [] : canonical(base || '').split('/');
+	for (var i = 0, len = path.length; i < len; i++){
+		var part = path[i];
+		switch (part){
+			case '.':
+				continue;
+			break;
+			case '..':
+				var item = base.pop();
+				if (!base.length && item == '') base.push('');
+			break;
+			default:
+				base.push(part);
 		}
 	}
-	return result.join('/');
+	return base.join('/');
 };
 
 })();
