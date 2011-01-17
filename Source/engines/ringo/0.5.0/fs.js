@@ -37,6 +37,7 @@ var _Dir = exports.Directory = new Class({
 		var cwd = fs.workingDirectory();
 		path = fscommon.toCanonical(path || cwd, cwd);
 		this.$path = path;
+		if (file.exists() && !file.isDirectory()) throw new Error('Path "'+path+'" is not a directory.');
 		return this;
 	},
 
@@ -171,6 +172,7 @@ var _File = exports.File = new Class({
 		var cwd = fs.workingDirectory();
 		path = fscommon.toCanonical(path || cwd, cwd);
 		this.$path = path;
+		if (file.exists() && !file.isFile()) throw new Error('Path "'+path+'" is not a file.');
 		return this;
 	},
 

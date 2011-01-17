@@ -184,7 +184,7 @@ var _File = exports.File = new Class({
 			cwd = system.getcwd();
 		path = fscommon.toCanonical(path || cwd, cwd);
 		file = new File(path);
-		if (file.exists() && !file.isFile()) throw new Error('Path "'+path+'" is not a directory.');
+		if (file.exists() && !file.isFile()) throw new Error('Path "'+path+'" is not a file.');
 		this.$path = path;
 		this.$file = file;
 		return this;
