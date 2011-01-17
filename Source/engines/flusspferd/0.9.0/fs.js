@@ -7,9 +7,7 @@ var getCwd = exports.getCwd = function(){
 	return fsbase.workingDirectory();
 };
 
-var _File = exports.File = new Class({
-
-	Extends: fscommon.File,
+var _Directory = exports.Directory = new Class({
 
 	resolve: function(path, skipCanon){
 		var cwd = fsbase.workingDirectory();
@@ -20,26 +18,8 @@ var _File = exports.File = new Class({
 
 	remove: function(recursive){
 		if (!this.exists()) return this.onRemoveError(new Error('File does not exists.'));
-		if (this.isDirectory()) return this.removeDir(recursive);
-		if (this.isFile()) return this.removeFile();
-		return this;
-	},
-
-	removeFile: function(){
-		var path = this.$path;
-		try {
-			fsbase.remove(path);
-			this.onRemove();
-		} catch(e){
-			this.onRemoveError();
-		}
-		return this;
-	},
-
-	removeDir: function(recursive){
 		var self = this,
-			path = this.$path,
-			File = this.$constructor;
+			path = this.$path;
 
 		var handler = function(){
 			try {
@@ -55,7 +35,14 @@ var _File = exports.File = new Class({
 			dir.addEvents({
 				list: function(contents){
 					contents.each(function(item){
-						new File(fscommon.toCanonical(item, path)).remove(true);
+						var file;
+						try {
+							file = new _Directory(fscommon.toCanonical(item, path));
+						} catch(e){
+							file = new _File(fscommon.toCanonical(item, path));
+						} finally {
+							file.remove(true);
+						}
 					});
 					handler();
 				},
@@ -63,6 +50,19 @@ var _File = exports.File = new Class({
 			}).list();
 		} else {
 			handler();
+		}
+		return this;
+	},
+
+	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
+		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
+		to = fscommon.toCanonical(to, fsbase.workingDirectory());
+		try {
+			fsbase.move(this.$path, to);
+			this.onMove(to);
+		} catch(e){
+			this.onMoveError(e);
 		}
 		return this;
 	},
@@ -101,7 +101,6 @@ var _File = exports.File = new Class({
 
 	list: function(){
 		if (!this.exists()) return this.onListError(new Error('File does not exists.'));
-		if (this.isFile()) return this.onListError(new Error('File is not a directory.'));
 		var path = this.$path;
 		try {
 			var results = fsbase.list(path);
@@ -112,27 +111,26 @@ var _File = exports.File = new Class({
 		return this;
 	},
 
-	createDir: function(recurse){
+	create: function(recurse){
 		var self = this;
 		if (this.exists()){
-			if (this.isFile()) return this.onCreateDirError(new Error('File is not a directory'));
-			return this.onCreateDir();
+			return this.onCreate();
 		} else {
 			var path = this.$path,
 				parent = this.getParent();
 			function handler(){
 				try {
 					fsbase.makeDirectory(path);
-					self.onCreateDir();
+					self.onCreate();
 				} catch(e){
-					self.onCreateDirError(e);
+					self.onCreateError(e);
 				}
 			}
 			if (recurse){
 				parent.addEvents({
-					createDir: handler,
-					createDirError: this.onCreateDirError.bind(this)
-				}).createDir(recurse);
+					create: handler,
+					createError: this.onCreateError.bind(this)
+				}).create(recurse);
 			} else {
 				handler();
 			}
@@ -141,11 +139,80 @@ var _File = exports.File = new Class({
 	},
 
 	makeDir: function(dir, recurse){
+		if (dir == null) return this.onMakeDirError('Argument dirName is required.');
 		var file = new this.$constructor(fscommon.toCanonical(dir, this.$path));
 		file.addEvents({
-			createDir: this.onMakeDir.bind(this),
-			createDirError: this.onMakeDirError.bind(this)
-		}).createDir(recurse);
+			create: this.onMakeDir.bind(this),
+			createError: this.onMakeDirError.bind(this)
+		}).create(recurse);
+		return this;
+	}
+
+});
+
+var _File = exports.File = new Class({
+
+	Extends: fscommon.File,
+
+	resolve: function(path, skipCanon){
+		var cwd = fsbase.workingDirectory();
+		if (!skipCanon) path = fscommon.toCanonical(path || cwd, cwd);
+		this.$path = path;
+		return this;
+	},
+
+	remove: function(){
+		if (!this.exists()) return this.onRemoveError(new Error('File does not exists.'));
+		var path = this.$path;
+		try {
+			fsbase.remove(path);
+			this.onRemove();
+		} catch(e){
+			this.onRemoveError();
+		}
+		return this;
+	},
+
+	move: function(to){
+		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
+		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
+		to = fscommon.toCanonical(to, fsbase.workingDirectory());
+		try {
+			fsbase.move(this.$path, to);
+			this.onMove(to);
+		} catch(e){
+			this.onMoveError(e);
+		}
+		return this;
+	},
+
+	// Info Functions
+
+	exists: function(){
+		return fsbase.exists(this.$path);
+	},
+
+	isDirectory: function(){
+		return fsbase.isDirectory(this.$path);
+	},
+
+	isFile: function(){
+		return fsbase.isFile(this.$path);
+	},
+
+	// Stat Functions
+
+	getStat: function(){
+		if (!this.exists()) return this.onStatError(new Error('File does not exists.'));
+		try {
+			var path = this.$path,
+				size = fsbase.size(path),
+				modified = fsbase.lastModified(path);
+			if (size !== undefined && modified !== undefined) return this.onStat({size: size, modified: modified.getTime()});
+			throw new Error('Cannot read stats.');
+		} catch(e){
+			this.onStatError(e);
+		}
 		return this;
 	},
 
@@ -153,7 +220,6 @@ var _File = exports.File = new Class({
 
 	read: function(){
 		if (!this.exists()) return this.onReadError(new Error('File does not exists.'));
-		if (this.isDirectory()) return this.onReadError(new Error('File is a directory.'));
 		var path = this.$path;
 		try {
 			var file = fsbase.openRaw(path, {read: 1});
@@ -167,7 +233,6 @@ var _File = exports.File = new Class({
 	},
 
 	write: function(data, append){
-		if (this.isDirectory()) return this.onReadError(new Error('File is a directory.'));
 		var path = this.$path;
 		try {
 			var options = {};
@@ -180,19 +245,6 @@ var _File = exports.File = new Class({
 			this.onWrite(data);
 		} catch(e){
 			this.onWriteError(e, data);
-		}
-		return this;
-	},
-
-	move: function(to){
-		if (to == null) return this.onMoveError(new Error('Destination argument `to` is required.'));
-		if (!this.exists()) return this.onMoveError(new Error('File does not exists.'));
-		to = fscommon.toCanonical(to, fsbase.workingDirectory());
-		try {
-			fsbase.move(this.$path, to);	
-			this.onMove(to);
-		} catch(e){
-			this.onMoveError(e);
 		}
 		return this;
 	}
