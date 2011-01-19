@@ -35,6 +35,54 @@ if (Object.defineProperty){
 })();
 
 
+/*
+---
+
+name: Cleaner
+
+description: Hides MooTools extensions using Object.defineProperty
+
+...
+*/
+
+(function(){
+
+var implement = Type.prototype.implement;
+
+var define = function(name, method){
+	var proto = this.prototype;
+	implement.call(this, name, method);
+	Object.defineProperty(proto, name, {
+		value: proto[name],
+		writable: true,
+		configurable: true,
+		enumerable: false
+	});
+};
+
+Type.prototype.implement = define.overloadSetter();
+
+var clean = function(){
+	var args = Array.prototype.slice.call(arguments);
+	args.forEach(function(Obj){
+		var proto = Obj.prototype;
+		for (var prop in proto){
+			Object.defineProperty(proto, prop, {
+				value: proto[prop],
+				writable: true,
+				configurable: true,
+				enumerable: false
+			});
+		}
+		Obj.implement = define.overloadSetter();
+	});
+};
+
+clean(Type, String, Array, Number, Function, RegExp, Object, Date);
+
+})();
+
+
 /* 
 ---
 
